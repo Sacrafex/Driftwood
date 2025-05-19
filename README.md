@@ -18,9 +18,11 @@ Driftwood is a deliberately useless browser built for those who love chaos, slow
 
 ## Tech Stack
 
-- HTML5 (kinda)
-- CSS (floats only)
-- JS (almost works)
+- HTML5
+- Electron
+- CSS
+- JS
+- NPM
 - Duct tape
 
 ---
