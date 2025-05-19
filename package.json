@@ -1,0 +1,44 @@
+{
+  "name": "driftwood-browser",
+  "version": "1.0.0",
+  "main": "main.js",
+  "author": "Your Name <your.email@example.com>",
+  "homepage": "https://example.com/driftwood-browser",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --linux --windows --x64"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.driftwood.browser",
+    "extraFiles": [
+      "newtab.html"
+    ],
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Network",
+      "icon": "icon.png"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "fileAssociations": [
+      {
+        "ext": "html",
+        "name": "HTML File",
+        "role": "Viewer"
+      }
+    ]
+  }
+}

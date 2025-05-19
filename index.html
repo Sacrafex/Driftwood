@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html data-theme="dark" style="height: 100%;">
+<head>
+  <title>Driftwood Browser</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --text-color: #f8fafc;
+      --accent-color: #e6ffff;
+      --tab-bg: #1e293b;
+      --border-radius: 8px;
+      --input-bg: #1e293b;
+    }
+
+    [data-theme="light"] {
+      --bg-color: #ffffff;
+      --text-color: #1e293b;
+      --tab-bg: #f1f5f9;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-color);
+      color: var(--text-color);
+      font-family: system-ui, sans-serif;
+    }
+
+    #tabs-container {
+      display: flex;
+      background: #8f9db5;
+      padding: 8px;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .tab {
+      padding: 10px 32px 10px 20px;
+      background: var(--bg-color);
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      position: relative;
+      max-width: 240px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      transition: all 0.2s ease;
+      border: 1px solid #e2e8f0;
+    }
+
+    .tab.active {
+      background: var(--accent-color);
+      color: #000000;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    .new-tab-btn, .theme-btn {
+      padding: 10px 16px;
+      background: var(--accent-color);
+      color: #000000;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+    }
+
+    #url-bar-container {
+      padding: 16px;
+      background: var(--tab-bg);
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    #url-bar {
+      flex: 1;
+      padding: 12px 24px;
+      border: 2px solid white;
+      border-radius: 24px;
+      background: #1e293b;
+      color: var(--text-color);
+      font-size: 16px;
+    }
+
+    #content {
+        flex: 1;
+        min-height: 0;
+        position: relative;
+        display: flex;
+    }
+
+    webview {
+        flex: 1;
+        width: 100%;
+        height: 100%;
+        border: none;
+        display: inline-flex !important;
+    }
+
+    .timer {
+      position: absolute;
+      right: 4px;
+      top: 4px;
+      font-size: 12px;
+      background: rgba(0,0,0,0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="tabs-container">
+    <div class="controls">
+      <button class="theme-btn" onclick="toggleTheme()">🌓</button>
+      <button class="new-tab-btn" onclick="createNewTab()">+</button>
+    </div>
+  </div>
+  <div id="url-bar-container">
+    <input type="text" id="url-bar" placeholder="Enter URL" autocomplete="off">
+  </div>
+  <div id="content"></div>
+
+  <script>
+    const tabData = new Map()
+    let activeTabId = null
+
+    function createNewTab(url) {
+      const tabId = Date.now().toString()
+      const tab = document.createElement('div')
+      tab.className = 'tab active'
+      tab.textContent = url ? new URL(url).hostname : 'New Tab'
+      tab.id = `tab-${tabId}`
+
+      const timer = document.createElement('div')
+      timer.className = 'timer'
+      timer.textContent = '1:09'
+      tab.appendChild(timer)
+
+      tab.addEventListener('click', () => switchTab(tabId))
+      document.getElementById('tabs-container').insertBefore(tab, document.querySelector('.controls'))
+
+      const webview = document.createElement('webview')
+      webview.className = 'webview'
+      webview.style.display = 'none'
+      webview.setAttribute('partition', 'persist:driftwood')
+      webview.src = url ? url : 'newtab.html'
+
+      document.getElementById('content').appendChild(webview)
+
+      const timerInterval = startTabTimer(tabId, timer)
+      tabData.set(tabId, {
+        webview,
+        timerInterval,
+        url: url || 'newtab.html'
+      })
+
+      switchTab(tabId)
+      return tabId
+    }
+
+    function startTabTimer(tabId, timerElement) {
+      let timeLeft = 69
+      return setInterval(() => {
+        timeLeft--
+        timerElement.textContent = `${Math.floor(timeLeft/60)}:${(timeLeft%60).toString().padStart(2, '0')}`
+        if(timeLeft <= 0) closeTab(tabId)
+      }, 1000)
+    }
+
+    function closeTab(tabId) {
+      clearInterval(tabData.get(tabId).timerInterval)
+      tabData.get(tabId).webview.remove()
+      document.getElementById(`tab-${tabId}`).remove()
+      tabData.delete(tabId)
+    }
+
+    function switchTab(tabId) {
+      activeTabId = tabId
+      document.querySelectorAll('.webview').forEach(w => w.style.display = 'none')
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+      tabData.get(tabId).webview.style.display = 'block'
+      document.getElementById(`tab-${tabId}`).classList.add('active')
+      document.getElementById('url-bar').value = tabData.get(tabId).webview.getURL()
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement
+      const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
+      html.setAttribute('data-theme', newTheme)
+    }
+
+    document.getElementById('url-bar').addEventListener('keypress', e => {
+      if(e.key === 'Enter') {
+        const url = e.target.value
+        if(activeTabId) {
+          tabData.get(activeTabId).webview.loadURL(url.startsWith('http') ? url : `https://${url}`)
+        }
+      }
+    })
+
+    createNewTab()
+  </script>
+</body>
+</html>
