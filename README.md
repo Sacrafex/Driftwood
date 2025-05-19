@@ -1,5 +1,7 @@
 # Driftwood Browser
 
+<img src="https://raw.githubusercontent.com/Sacrafex/Driftwood/refs/heads/main/img/icon.png" alt="Logo" width="100"/>
+
 > _Just along for the ride._
 
 Driftwood is a deliberately useless browser built for those who love chaos, slowness, and the occasional broken website. It doesn’t try to load the internet — it **floats** near it.
