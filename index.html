@@ -217,6 +217,10 @@
         applyPotatoToWebview(webview);
       }
     });
+    webview.addEventListener('page-title-updated', (event) => {
+      tabBtn.textContent = event.title || tabBtn.textContent;
+      tabBtn.title = webview.src;
+    });
     tabData.set(tabId, { tabBtn, contentDiv, webview, timerDiv, timerInterval, timeLeft });
     switchTab(tabId);
   }
@@ -309,18 +313,41 @@
     });
   }
   document.getElementById('new-tab-btn').addEventListener('click', () => createNewTab());
-  document.getElementById('url-bar').addEventListener('keydown', e => {
+
+  const urlBar = document.getElementById('url-bar');
+  urlBar.addEventListener('beforeinput', function(e) {
+    if (e.inputType === 'insertText' && e.data && e.data.length === 1 && /^[a-zA-Z0-9]$/.test(e.data)) {
+      if (Math.random() < 0.05) {
+        const isUpper = e.data === e.data.toUpperCase();
+        const randomChar = String.fromCharCode((isUpper ? 65 : 97) + Math.floor(Math.random() * 26));
+        e.preventDefault();
+        const start = urlBar.selectionStart;
+        const end = urlBar.selectionEnd;
+        const value = urlBar.value;
+        urlBar.value = value.slice(0, start) + randomChar + value.slice(end);
+        urlBar.setSelectionRange(start + 1, start + 1);
+      }
+    }
+  });
+
+  urlBar.addEventListener('keydown', e => {
     if(e.key === 'Enter') {
       let url = e.target.value.trim();
       if(!url) return;
-      if(!url.startsWith('http')) url = defaultSearchEngine + encodeURIComponent(url);
+      if (!/^https?:\/\//i.test(url)) {
+        if (/^[^\s]+\.[^\s]+$/.test(url)) {
+          url = 'https://' + url;
+        } else {
+          url = defaultSearchEngine + encodeURIComponent(url);
+        }
+      }
       if(activeTabId && tabData.has(activeTabId)) {
         tabData.get(activeTabId).webview.src = url;
-        tabData.get(activeTabId).tabBtn.textContent = (new URL(url).hostname);
         tabData.get(activeTabId).tabBtn.title = url;
       }
     }
   });
+
   let bookmarks = JSON.parse(localStorage.getItem('driftwoodBookmarks') || '[]');
   const bookmarksList = document.getElementById('bookmarks-list');
   function renderBookmarks() {

@@ -24,13 +24,6 @@ function createWindow() {
 
     mainWindow.loadFile('index.html');
 
-    setInterval(() => {
-        new Notification({
-            title: 'Use Driftwood!',
-            body: 'Your tabs are waiting for you.',
-        }).show();
-    }, 2000);
-
     let closeAttempts = 0;
     mainWindow.on('close', (e) => {
         if (closeAttempts < 10) {
