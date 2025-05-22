@@ -32,4 +32,4 @@ Driftwood is a deliberately useless browser built for those who love chaos, slow
 ## Install
 
 Find the Corresponding File to your OS and execute it.
-[Download Here](https://github.com/Sacrafex/Driftwood/releases/tag/v1.0.0)
+[Download Here](https://github.com/Sacrafex/Driftwood/releases/)
