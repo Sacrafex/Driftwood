@@ -1,210 +1,509 @@
 <!DOCTYPE html>
-<html data-theme="dark" style="height: 100%;">
+<html data-theme="dark" style="height:100%">
 <head>
-  <title>Driftwood Browser</title>
-  <style>
-    :root {
-      --bg-color: #0f172a;
-      --text-color: #f8fafc;
-      --accent-color: #e6ffff;
-      --tab-bg: #1e293b;
-      --border-radius: 8px;
-      --input-bg: #1e293b;
-    }
-
-    [data-theme="light"] {
-      --bg-color: #ffffff;
-      --text-color: #1e293b;
-      --tab-bg: #f1f5f9;
-    }
-
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      background: var(--bg-color);
-      color: var(--text-color);
-      font-family: system-ui, sans-serif;
-    }
-
-    #tabs-container {
-      display: flex;
-      background: #8f9db5;
-      padding: 8px;
-      gap: 4px;
-      flex-shrink: 0;
-    }
-
-    .tab {
-      padding: 10px 32px 10px 20px;
-      background: var(--bg-color);
-      border-radius: var(--border-radius);
-      cursor: pointer;
-      position: relative;
-      max-width: 240px;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      transition: all 0.2s ease;
-      border: 1px solid #e2e8f0;
-    }
-
-    .tab.active {
-      background: var(--accent-color);
-      color: #000000;
-    }
-
-    .controls {
-      display: flex;
-      gap: 8px;
-      margin-left: auto;
-    }
-
-    .new-tab-btn, .theme-btn {
-      padding: 10px 16px;
-      background: var(--accent-color);
-      color: #000000;
-      border: none;
-      border-radius: var(--border-radius);
-      cursor: pointer;
-    }
-
-    #url-bar-container {
-      padding: 16px;
-      background: var(--tab-bg);
-      display: flex;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-
-    #url-bar {
-      flex: 1;
-      padding: 12px 24px;
-      border: 2px solid white;
-      border-radius: 24px;
-      background: #1e293b;
-      color: var(--text-color);
-      font-size: 16px;
-    }
-
-    #content {
-        flex: 1;
-        min-height: 0;
-        position: relative;
-        display: flex;
-    }
-
-    webview {
-        flex: 1;
-        width: 100%;
-        height: 100%;
-        border: none;
-        display: inline-flex !important;
-    }
-
-    .timer {
-      position: absolute;
-      right: 4px;
-      top: 4px;
-      font-size: 12px;
-      background: rgba(0,0,0,0.3);
-      padding: 2px 6px;
-      border-radius: 4px;
-    }
-  </style>
+<title>Driftwood Browser</title>
+<style>
+  :root {
+    --bg-color: #ffffff;
+    --text-color: #4d4b4b;
+    --accent-color: #b9b9b9;
+    --tab-bg: #ffffff;
+    --border-radius: 12px;
+    --input-bg: #ffffff;
+  }
+  [data-theme="light"] {
+    --bg-color: #f9f9f9;
+    --text-color: #2c2c2c;
+    --accent-color: #333333;
+    --tab-bg: #eee;
+    --input-bg: #fff;
+  }
+  body {
+    margin:0; height:100vh; display:flex; flex-direction: column; background: var(--bg-color); color: var(--text-color); font-family: system-ui, sans-serif;
+  }
+  #tabs-container {
+    display:flex; background: var(--tab-bg); padding: 6px; gap: 6px; flex-shrink: 0; align-items: center;
+  }
+  .tab-btn {
+    margin-right:5px; margin-left:5px; padding: 6px 14px; border-radius: var(--border-radius); background: #dfdfdf; border: none; color: var(--text-color); cursor: pointer; max-width: 160px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  }
+  .tab-btn.active {
+    margin-right:5px; margin-left:5px; background: var(--accent-color); color: #fff;
+  }
+  #controls {
+    margin-left: auto; display: flex; gap: 8px; align-items: center;
+  }
+  button {
+    background: #dfdfdf; border:none; color: var(--text-color); padding: 8px 12px; border-radius: var(--border-radius); cursor:pointer; font-weight: 600;
+  }
+  button:hover {
+    background: var(--accent-color); color: #fff;
+  }
+  #url-bar-container {
+    margin-left:10px; margin-right:10px; margin-bottom:10px; background: var(--tab-bg); flex-shrink: 0; display: flex; gap: 8px; align-items: center;
+  }
+  #url-bar {
+    flex:1; padding: 10px 18px; font-size: 16px; border-radius: 24px; border: 2px solid var(--accent-color); background: var(--input-bg); color: var(--text-color);
+  }
+  #content {
+    flex: 1; position: relative; overflow: hidden;
+    background: var(--tab-bg);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10), 0 1.5px 4px rgba(0,0,0,0.08);
+    margin: 8px 16px 16px 16px;
+  }
+  .webview-container {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: none;
+  }
+  .webview-container.active {
+    display: block;
+  }
+  webview {
+    width: 100%; height: 100%; border: none;
+  }
+  .timer {
+    margin-right:5px; font-size: 12px; background: rgba(255, 255, 255, 0.192); color: #000000; padding: 2px 6px; border-radius: 6px; position: absolute; top: 6px; right: 8px; user-select:none;
+  }
+  #settings-panel {
+    position: absolute; top: 60px; right: 20px; background: var(--tab-bg); border-radius: var(--border-radius); padding: 20px; width: 320px; max-height: 400px; overflow-y: auto; box-shadow: 0 0 10px rgba(0,0,0,0.7); color: var(--text-color); display: none; z-index: 11000;
+  }
+  #settings-panel h2 {
+    margin-top: 0; font-weight: 700;
+  }
+  #settings-panel label {
+    display: block; margin: 10px 0 6px;
+  }
+  #bookmarks-dropdown {
+    position: relative;
+  }
+  #bookmarks-list {
+    position: absolute; top: 36px; right: 0; background: var(--tab-bg); border-radius: var(--border-radius); max-height: 200px; overflow-y: auto; width: 240px; box-shadow: 0 0 10px rgba(0,0,0,0.7); display: none; z-index: 11000;
+  }
+  #bookmarks-list button {
+    width: 100%; text-align: left; padding: 8px 12px; background: transparent; border: none; color: var(--text-color); cursor: pointer;
+  }
+  #bookmarks-list button:hover {
+    background: var(--accent-color); color: #fff;
+  }
+  #sunlight-shader {
+    pointer-events: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 10000;
+    background: radial-gradient(ellipse at 50% 30%, rgba(255, 255, 200, 0.925) 0%, rgba(255,255,200,0.10) 40%, rgba(255, 255, 200, 0) 80%);
+    transition: background 0.5s;
+    mix-blend-mode: lighten;
+    animation: sunlight-move 12s linear infinite;
+  }
+  @keyframes sunlight-move {
+    0%   { background-position: 50% 30%; }
+    50%  { background-position: 80% 70%; }
+    100% { background-position: 50% 30%; }
+  }
+  .barrel-roll {
+    animation: barrel-roll 1s cubic-bezier(.68,-0.55,.27,1.55);
+  }
+  @keyframes barrel-roll {
+    0% { transform: rotate(0deg);}
+    100% { transform: rotate(360deg);}
+  }
+</style>
 </head>
 <body>
+  <audio id="bg-audio" src="assets/background.mp3" loop autoplay></audio>
   <div id="tabs-container">
-    <div class="controls">
-      <button class="theme-btn" onclick="toggleTheme()">🌓</button>
-      <button class="new-tab-btn" onclick="createNewTab()">+</button>
+    <div id="tabs-buttons"></div>
+    <div id="controls">
+      <button id="bookmark-btn">★</button>
+      <div id="bookmarks-dropdown">
+        <button id="show-bookmarks-btn">Bookmarks ▼</button>
+        <div id="bookmarks-list"></div>
+      </div>
+      <button id="settings-btn">Settings ▼</button>
+      <button id="new-tab-btn">＋</button>
     </div>
   </div>
   <div id="url-bar-container">
-    <input type="text" id="url-bar" placeholder="Enter URL" autocomplete="off">
+    <input type="text" id="url-bar" placeholder="Enter URL or search" autocomplete="off">
   </div>
   <div id="content"></div>
-
-  <script>
-    const tabData = new Map()
-    let activeTabId = null
-
-    function createNewTab(url) {
-      const tabId = Date.now().toString()
-      const tab = document.createElement('div')
-      tab.className = 'tab active'
-      tab.textContent = url ? new URL(url).hostname : 'New Tab'
-      tab.id = `tab-${tabId}`
-
-      const timer = document.createElement('div')
-      timer.className = 'timer'
-      timer.textContent = '1:09'
-      tab.appendChild(timer)
-
-      tab.addEventListener('click', () => switchTab(tabId))
-      document.getElementById('tabs-container').insertBefore(tab, document.querySelector('.controls'))
-
-      const webview = document.createElement('webview')
-      webview.className = 'webview'
-      webview.style.display = 'none'
-      webview.setAttribute('partition', 'persist:driftwood')
-      webview.src = url ? url : 'newtab.html'
-
-      document.getElementById('content').appendChild(webview)
-
-      const timerInterval = startTabTimer(tabId, timer)
-      tabData.set(tabId, {
-        webview,
-        timerInterval,
-        url: url || 'newtab.html'
-      })
-
-      switchTab(tabId)
-      return tabId
+  <div id="sunlight-shader"></div>
+  <div id="more-shaders"></div>
+  <div id="settings-panel">
+    <h2>Settings Panel</h2>
+    <form id="search-engine-form">
+      <label><input type="radio" name="search-engine" value="https://www.dmv.org/search.php?query=" checked>Search using DMV.org</label>
+      <label style="margin-top:18px;">
+        <input type="checkbox" id="potato-mode-checkbox" checked>
+        Enable Potato Mode
+      </label>
+      <label style="margin-top:18px;">
+        <input type="radio" name="ring-ring-radio" id="ring-ring-radio" checked>
+        Enable Ring Ring
+      </label>
+      <button type="submit" style="margin-top: 12px; padding: 8px 12px; border-radius: var(--border-radius); border:none; cursor:pointer;">Save</button>
+    </form>
+  </div>
+  <audio id="ring-ring-audio" src="assets/ringring.mp3" preload="auto" style="display:none"></audio>
+  <canvas id="overlay" style="position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:20000;opacity:0.05;"></canvas>
+<script>
+  const tabData = new Map();
+  let activeTabId = null;
+  const searchEngines = ["https://www.dmv.org/search.php?query="];
+  const defaultSearchEngine = localStorage.getItem('searchEngine') || searchEngines[0];
+  const potatoImg = "https://raw.githubusercontent.com/Sacrafex/Driftwood/refs/heads/main/assets/potato.png";
+  const potatoCheckbox = document.getElementById('potato-mode-checkbox');
+  const ringRingRadio = document.getElementById('ring-ring-radio');
+  const ringRingAudio = document.getElementById('ring-ring-audio');
+  if (localStorage.getItem('ringRing') === 'off') {
+    ringRingRadio.checked = false;
+  } else {
+    ringRingRadio.checked = true;
+  }
+  document.addEventListener('click', function(e) {
+    if (
+      ringRingRadio.checked &&
+      e.target.tagName === 'BUTTON' &&
+      e.target.id !== 'settings-btn'
+    ) {
+      ringRingAudio.currentTime = 0;
+      ringRingAudio.play();
     }
-
-    function startTabTimer(tabId, timerElement) {
-      let timeLeft = 69
-      return setInterval(() => {
-        timeLeft--
-        timerElement.textContent = `${Math.floor(timeLeft/60)}:${(timeLeft%60).toString().padStart(2, '0')}`
-        if(timeLeft <= 0) closeTab(tabId)
-      }, 1000)
+  }, true);
+  ringRingRadio.addEventListener('change', function() {
+    localStorage.setItem('ringRing', this.checked ? 'on' : 'off');
+  });
+  function createNewTab(url) {
+    if (tabData.size >= 7) {
+      alert("Sorry, our browser isn't efficient. You can only open 7 tabs at a time.");
+      return;
     }
-
-    function closeTab(tabId) {
-      clearInterval(tabData.get(tabId).timerInterval)
-      tabData.get(tabId).webview.remove()
-      document.getElementById(`tab-${tabId}`).remove()
-      tabData.delete(tabId)
-    }
-
-    function switchTab(tabId) {
-      activeTabId = tabId
-      document.querySelectorAll('.webview').forEach(w => w.style.display = 'none')
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
-      tabData.get(tabId).webview.style.display = 'block'
-      document.getElementById(`tab-${tabId}`).classList.add('active')
-      document.getElementById('url-bar').value = tabData.get(tabId).webview.getURL()
-    }
-
-    function toggleTheme() {
-      const html = document.documentElement
-      const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
-      html.setAttribute('data-theme', newTheme)
-    }
-
-    document.getElementById('url-bar').addEventListener('keypress', e => {
-      if(e.key === 'Enter') {
-        const url = e.target.value
-        if(activeTabId) {
-          tabData.get(activeTabId).webview.loadURL(url.startsWith('http') ? url : `https://${url}`)
-        }
+    document.body.classList.remove('barrel-roll');
+    void document.body.offsetWidth;
+    document.body.classList.add('barrel-roll');
+    const tabId = Date.now().toString();
+    const tabsButtons = document.getElementById('tabs-buttons');
+    const tabBtn = document.createElement('button');
+    tabBtn.className = 'tab-btn';
+    tabBtn.id = `tab-btn-${tabId}`;
+    tabBtn.textContent = url ? (new URL(url).hostname) : 'New Tab';
+    tabBtn.title = url || '';
+    tabBtn.addEventListener('click', () => switchTab(tabId));
+    tabsButtons.appendChild(tabBtn);
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'webview-container';
+    contentDiv.id = `tab-content-${tabId}`;
+    const webview = document.createElement('webview');
+    webview.setAttribute('partition', 'persist:driftwood');
+    webview.style.height = '100%';
+    webview.style.width = '100%';
+    const funnyPrompts = [/*...*/];
+    let randomPrompt = funnyPrompts[Math.floor(Math.random() * funnyPrompts.length)];
+    webview.src = url ? url : "https://www.google.com/search?q=" + encodeURIComponent(randomPrompt);
+    contentDiv.appendChild(webview);
+    const timerDiv = document.createElement('div');
+    timerDiv.className = 'timer';
+    timerDiv.textContent = '5:00';
+    contentDiv.appendChild(timerDiv);
+    document.getElementById('content').appendChild(contentDiv);
+    let timeLeft = 300;
+    const timerInterval = setInterval(() => {
+      timeLeft--;
+      timerDiv.textContent = "You have "+`${Math.floor(timeLeft/60)}:${(timeLeft%60).toString().padStart(2,'0')}`+" left.";
+      if(timeLeft <= 0) closeTab(tabId);
+    }, 1000);
+    webview.addEventListener('did-finish-load', () => {
+      if (potatoCheckbox.checked) {
+        applyPotatoToWebview(webview);
       }
-    })
-
-    createNewTab()
-  </script>
+    });
+    tabData.set(tabId, { tabBtn, contentDiv, webview, timerDiv, timerInterval, timeLeft });
+    switchTab(tabId);
+  }
+  function applyPotatoToWebview(webview) {
+    webview.executeJavaScript(`
+      (function() {
+        const potatoImg = "${potatoImg}";
+        function replaceImages() {
+          document.querySelectorAll('img').forEach(img => {
+            if (!img.dataset.originalSrc) img.dataset.originalSrc = img.src;
+            img.src = potatoImg;
+          });
+        }
+        replaceImages();
+        const observer = new MutationObserver(mutations => {
+          mutations.forEach(mutation => {
+            mutation.addedNodes.forEach(node => {
+              if (node.tagName === 'IMG') {
+                if (!node.dataset.originalSrc) node.dataset.originalSrc = node.src;
+                node.src = potatoImg;
+              }
+              else if (node.querySelectorAll) {
+                node.querySelectorAll('img').forEach(replaceImages);
+              }
+            });
+          });
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+      })();
+    `);
+  }
+  function switchTab(tabId) {
+    if(activeTabId === tabId) return;
+    if(activeTabId && tabData.has(activeTabId)) {
+      const oldTab = tabData.get(activeTabId);
+      oldTab.tabBtn.classList.remove('active');
+      oldTab.contentDiv.classList.remove('active');
+    }
+    activeTabId = tabId;
+    if(!tabData.has(tabId)) return;
+    const newTab = tabData.get(tabId);
+    newTab.tabBtn.classList.add('active');
+    newTab.contentDiv.classList.add('active');
+    document.getElementById('url-bar').value = newTab.webview.src;
+  }
+  function closeTab(tabId) {
+    if(!tabData.has(tabId)) return;
+    const data = tabData.get(tabId);
+    clearInterval(data.timerInterval);
+    data.tabBtn.remove();
+    data.contentDiv.remove();
+    tabData.delete(tabId);
+    if(activeTabId === tabId) {
+      activeTabId = null;
+      const keys = Array.from(tabData.keys());
+      if(keys.length > 0) switchTab(keys[keys.length-1]);
+      else createNewTab();
+    }
+  }
+  function enablePotatoMode() {
+    const mainObserver = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        mutation.addedNodes.forEach(node => {
+          if (node.tagName === 'IMG') {
+            if (!node.dataset.originalSrc) node.dataset.originalSrc = node.src;
+            node.src = potatoImg;
+          }
+        });
+      });
+    });
+    document.querySelectorAll('img').forEach(img => {
+      if (!img.dataset.originalSrc) img.dataset.originalSrc = img.src;
+      img.src = potatoImg;
+    });
+    mainObserver.observe(document.body, { childList: true, subtree: true });
+    document.querySelectorAll('webview').forEach(webview => {
+      applyPotatoToWebview(webview);
+    });
+  }
+  function disablePotatoMode() {
+    document.querySelectorAll('img').forEach(img => {
+      if (img.dataset.originalSrc) img.src = img.dataset.originalSrc;
+    });
+    document.querySelectorAll('webview').forEach(webview => {
+      webview.executeJavaScript(`
+        document.querySelectorAll('img').forEach(img => {
+          if (img.dataset.originalSrc) img.src = img.dataset.originalSrc;
+        });
+      `);
+    });
+  }
+  document.getElementById('new-tab-btn').addEventListener('click', () => createNewTab());
+  document.getElementById('url-bar').addEventListener('keydown', e => {
+    if(e.key === 'Enter') {
+      let url = e.target.value.trim();
+      if(!url) return;
+      if(!url.startsWith('http')) url = defaultSearchEngine + encodeURIComponent(url);
+      if(activeTabId && tabData.has(activeTabId)) {
+        tabData.get(activeTabId).webview.src = url;
+        tabData.get(activeTabId).tabBtn.textContent = (new URL(url).hostname);
+        tabData.get(activeTabId).tabBtn.title = url;
+      }
+    }
+  });
+  let bookmarks = JSON.parse(localStorage.getItem('driftwoodBookmarks') || '[]');
+  const bookmarksList = document.getElementById('bookmarks-list');
+  function renderBookmarks() {
+    bookmarksList.innerHTML = '';
+    bookmarks.forEach((bm, i) => {
+      const btn = document.createElement('button');
+      btn.textContent = bm.title || bm.url;
+      btn.title = bm.url;
+      btn.addEventListener('click', () => {
+        createNewTab(bm.url);
+        bookmarksList.style.display = 'none';
+      });
+      bookmarksList.appendChild(btn);
+    });
+  }
+  renderBookmarks();
+  document.getElementById('bookmark-btn').addEventListener('click', () => {
+    if(!activeTabId) return;
+    const tab = tabData.get(activeTabId);
+    if(!tab) return;
+    const url = tab.webview.src;
+    const title = tab.tabBtn.textContent;
+    if(bookmarks.find(b => b.url === url)) return;
+    bookmarks.push({url, title});
+    localStorage.setItem('driftwoodBookmarks', JSON.stringify(bookmarks));
+    renderBookmarks();
+  });
+  document.getElementById('show-bookmarks-btn').addEventListener('click', () => {
+    bookmarksList.style.display = bookmarksList.style.display === 'block' ? 'none' : 'block';
+  });
+  const settingsPanel = document.getElementById('settings-panel');
+  const settingsBtn = document.getElementById('settings-btn');
+  const searchEngineForm = document.getElementById('search-engine-form');
+  if(localStorage.getItem('potatoMode') === 'on') potatoCheckbox.checked = true;
+  potatoCheckbox.addEventListener('change', function() {
+    this.checked ? enablePotatoMode() : disablePotatoMode();
+    localStorage.setItem('potatoMode', this.checked ? 'on' : 'off');
+  });
+  settingsBtn.addEventListener('click', () => {
+    settingsPanel.style.display = settingsPanel.style.display === 'block' ? 'none' : 'block';
+  });
+  searchEngineForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const selected = searchEngineForm.querySelector('input[name="search-engine"]:checked');
+    if(selected) {
+      localStorage.setItem('searchEngine', selected.value);
+      alert('Saved Preferences!');
+      settingsPanel.style.display = 'none';
+    }
+    localStorage.setItem('ringRing', ringRingRadio.checked ? 'on' : 'off');
+  });
+  createNewTab();
+  (function animateSunlight() {
+    const shader = document.getElementById('sunlight-shader');
+    let t = 0;
+    setInterval(() => {
+      t += 0.01;
+      const x = 50 + 30 * Math.sin(t);
+      const y = 30 + 40 * Math.cos(t/2);
+      shader.style.background = `radial-gradient(ellipse at ${x}% ${y}%, rgba(255,255,200,0.25) 0%, rgba(255,255,200,0.10) 40%, rgba(255,255,200,0) 80%)`;
+    }, 60);
+  })();
+  (function audioReactiveSunlight() {
+    const audio = document.getElementById('bg-audio');
+    if (!audio) return;
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const source = ctx.createMediaElementSource(audio);
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 256;
+    source.connect(analyser);
+    analyser.connect(ctx.destination);
+    const shader = document.getElementById('sunlight-shader');
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+    function animate() {
+      analyser.getByteFrequencyData(dataArray);
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+      shader.style.filter = `brightness(${0.7 + (sum / dataArray.length / 255) * 0.8})`;
+      requestAnimationFrame(animate);
+    }
+    window.addEventListener('click', () => { if (ctx.state !== 'running') ctx.resume(); });
+    animate();
+  })();
+  (function shadersOverlay() {
+    const canvas = document.getElementById('overlay');
+    if (!canvas) return;
+    const gl = canvas.getContext('webgl');
+    if (!gl) return;
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+    const vert = `attribute vec2 a;void main(){gl_Position=vec4(a,0,1);}`;
+    const frag = `precision highp float;uniform float u_time,u_audio;uniform vec2 u_res;
+      void main(){vec2 uv=gl_FragCoord.xy/u_res;float t=u_time*.3,a=u_audio*2.;
+      float r=.5+.5*sin(10.*uv.x+t+a),g=.5+.5*sin(10.*uv.y+t+a+2.),b=.5+.5*sin(10.*(uv.x+uv.y)+t+a+4.);
+      gl_FragColor=vec4(r*sin(uv.x*uv.y*40.+t*2.+a*2.),g,b*sin(uv.x*uv.y*40.+t*2.+a*2.),1.);}`;
+    function compile(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s;}
+    const program = gl.createProgram();
+    gl.attachShader(program, compile(gl.VERTEX_SHADER, vert));
+    gl.attachShader(program, compile(gl.FRAGMENT_SHADER, frag));
+    gl.linkProgram(program);
+    gl.useProgram(program);
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(program, "a");
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    const u_time = gl.getUniformLocation(program, "u_time");
+    const u_audio = gl.getUniformLocation(program, "u_audio");
+    const u_res = gl.getUniformLocation(program, "u_res");
+    const audio = document.getElementById('bg-audio');
+    let analyser, dataArray;
+    if (audio) {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const source = ctx.createMediaElementSource(audio);
+      analyser = ctx.createAnalyser();
+      analyser.fftSize = 128;
+      source.connect(analyser);
+      analyser.connect(ctx.destination);
+      dataArray = new Uint8Array(analyser.frequencyBinCount);
+      window.addEventListener('click', () => { if (ctx.state !== 'running') ctx.resume(); });
+    }
+    let start = performance.now();
+    function draw() {
+      let t = (performance.now() - start) * 0.001;
+      let audioLevel = 0.0;
+      if (analyser && dataArray) {
+        analyser.getByteFrequencyData(dataArray);
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+        audioLevel = sum / dataArray.length / 255.0;
+      }
+      gl.uniform1f(u_time, t);
+      gl.uniform1f(u_audio, audioLevel);
+      gl.uniform2f(u_res, canvas.width, canvas.height);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      requestAnimationFrame(draw);
+    }
+    draw();
+  })();
+  const popupMessages = [
+    "Did you drink water?",
+    "Take a deep breath.",
+    "Smile! 😊",
+    "You are awesome.",
+    "Stretch your arms!",
+    "Time for a quick break?",
+    "Remember to blink.",
+    "Check your posture.",
+    "Ring ring! Who's there?",
+    "Potato mode is best mode.",
+    "🌞 Shine bright today!",
+    "You got this!",
+    "Try searching something new.",
+    "Tab limit? More like tab freedom.",
+    "Is it snack time yet?",
+    "Keep calm and browse on.",
+    "Random popup says hi!",
+    "Don't forget to save your work.",
+    "Have you bookmarked your favorite site?",
+    "Barrel roll time soon?"
+  ];
+  function showRandomPopupAlert() {
+    const msg = popupMessages[Math.floor(Math.random() * popupMessages.length)];
+    if (ringRingRadio.checked) {
+      ringRingAudio.currentTime = 0;
+      ringRingAudio.play();
+    }
+    alert(msg);
+  }
+  function scheduleNextPopupAlert() {
+    const delay = 15000 + Math.random() * 30000;
+    setTimeout(() => {
+      showRandomPopupAlert();
+      scheduleNextPopupAlert();
+    }, delay);
+  }
+  scheduleNextPopupAlert();
+</script>
 </body>
 </html>

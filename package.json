@@ -1,9 +1,9 @@
 {
   "name": "driftwood-browser",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "main.js",
   "author": "Your Name <your.email@example.com>",
-  "homepage": "https://example.com/driftwood-browser",
+  "homepage": "https://github.com/Sacrafex/Driftwood",
   "scripts": {
     "start": "electron .",
     "build": "electron-builder --linux --windows --x64"
@@ -28,6 +28,14 @@
     "win": {
       "target": "nsis",
       "icon": "icon.ico"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.productivity",
+      "icon": "icon.png"
     },
     "nsis": {
       "oneClick": false,

@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, session, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, session, dialog, Notification } = require('electron');
 const path = require('path');
 
 let mainWindow;
@@ -8,14 +8,15 @@ function createWindow() {
         width: 1200,
         height: 800,
         icon: path.join(__dirname, process.platform === 'win32' ? 'icon.ico' : 'icon.png'),
-                                   webPreferences: {
-                                       nodeIntegration: true,
-                                   contextIsolation: false,
-                                   webviewTag: true,
-                                   allowRunningInsecureContent: true,
-                                   webSecurity: false,
-                                   enableRemoteModule: true
-                                   }
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false,
+            webviewTag: true,
+            allowRunningInsecureContent: true,
+            webSecurity: false,
+            enableRemoteModule: true,
+            webgl: true
+        }
     });
 
     session.defaultSession.clearCache().catch(() => {});
@@ -23,18 +24,31 @@ function createWindow() {
 
     mainWindow.loadFile('index.html');
 
-    setTimeout(() => {
-        if (mainWindow) {
-            dialog.showMessageBox(mainWindow, {
-                type: 'warning',
-                buttons: ['Yes'],
-                title: 'Resource Warning',
-                message: 'Program taking up too much resources. Terminate?',
-            }).then(() => {
-                app.exit();
+    setInterval(() => {
+        new Notification({
+            title: 'Use Driftwood!',
+            body: 'Your tabs are waiting for you.',
+        }).show();
+    }, 2000);
+
+    let closeAttempts = 0;
+    mainWindow.on('close', (e) => {
+        if (closeAttempts < 10) {
+            e.preventDefault();
+            dialog.showMessageBoxSync(mainWindow, {
+                type: 'question',
+                buttons: ['No', 'Yes'],
+                defaultId: 0,
+                cancelId: 0,
+                title: 'Wait!',
+                message: `Are you sure you want to close Driftwood? (${closeAttempts + 1}/10)`
             });
+            closeAttempts++;
+            if (closeAttempts >= 10) {
+                mainWindow.destroy();
+            }
         }
-    }, 150000000);
+    });
 }
 
 ipcMain.on('create-tab', (event, url) => {
@@ -43,9 +57,13 @@ ipcMain.on('create-tab', (event, url) => {
     }
 });
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+    session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+        callback(true);
+    });
+    createWindow();
+});
 
-// For the losers that use mac if I decide to export it
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit();
 });
