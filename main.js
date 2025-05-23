@@ -19,21 +19,31 @@ function createWindow() {
         }
     });
 
+    mainWindow.loadFile('index.html');
+
     session.defaultSession.clearCache().catch(() => {});
     session.defaultSession.clearStorageData().catch(() => {});
 
-    mainWindow.loadFile('index.html');
-
-    mainWindow.webContents.on('before-input-event', (event, input) => {
+    mainWindow.webContents.on('input-event', (event, input) => {
         if ((input.control || input.meta) && input.key.toLowerCase() === 'q') {
+            forceClose();
+        }
+    });
+
+    ipcMain.webContents.on('input-event', (event, input) => {
+        if ((input.control || input.meta) && input.key.toLowerCase() === 'q') {
+            forceClose();
+        }
+    });
+
+    function forceClose() {
+        mainWindow.destroy();
             const notification2 = new Notification({
                     title: 'Driftwood',
                     body: 'Cheater. Who told you about Ctrl+Q? You can just use the close button.',
                 });
                 notification2.show();
-            mainWindow.destroy();
-        }
-    });
+    }
 
     let closeAttempts = 0;
     mainWindow.on('close', (e) => {
