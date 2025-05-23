@@ -561,6 +561,10 @@
     createNewTab();
   });
 
+  ipcRenderer.on('trigger-rdp', () => {
+    showRandomPopupAlert();
+  });
+
   ipcRenderer.on('trigger-close-tab', () => {
     if (tabData.size > 1 && activeTabId) {
       closeTab(activeTabId);
