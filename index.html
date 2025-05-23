@@ -430,7 +430,7 @@
       const x = 50 + 30 * Math.sin(t);
       const y = 30 + 40 * Math.cos(t/2);
       shader.style.background = `radial-gradient(ellipse at ${x}% ${y}%, rgba(255,255,200,0.25) 0%, rgba(255,255,200,0.10) 40%, rgba(255,255,200,0) 80%)`;
-      shader.style.display = "block"; // Fix: ensure it's visible
+      shader.style.display = "block";
     }, 60);
   })();
   (function audioReactiveSunlight() {
