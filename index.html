@@ -107,6 +107,19 @@
     0% { transform: rotate(0deg);}
     100% { transform: rotate(360deg);}
   }
+  @keyframes shake {
+    0% { transform: translateX(0); }
+    15% { transform: translateX(-6px); }
+    30% { transform: translateX(6px); }
+    45% { transform: translateX(-5px); }
+    60% { transform: translateX(5px); }
+    75% { transform: translateX(-3px); }
+    90% { transform: translateX(3px); }
+    100% { transform: translateX(0); }
+  }
+  .shake {
+    animation: shake 0.3s;
+  }
 </style>
 </head>
 <body>
@@ -330,7 +343,11 @@
     }
   });
 
+  // Add shake on keydown
   urlBar.addEventListener('keydown', e => {
+    urlBar.classList.remove('shake');
+    void urlBar.offsetWidth; // force reflow to restart animation
+    urlBar.classList.add('shake');
     if(e.key === 'Enter') {
       let url = e.target.value.trim();
       if(!url) return;
@@ -531,6 +548,21 @@
     }, delay);
   }
   scheduleNextPopupAlert();
+
+  // IPC for tab actions
+  const { ipcRenderer } = require('electron');
+
+  ipcRenderer.on('trigger-new-tab', () => {
+    createNewTab();
+  });
+
+  ipcRenderer.on('trigger-close-tab', () => {
+    if (tabData.size > 1 && activeTabId) {
+      closeTab(activeTabId);
+    } else if (tabData.size === 1) {
+      window.close();
+    }
+  });
 </script>
 </body>
 </html>

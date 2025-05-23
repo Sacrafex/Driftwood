@@ -24,6 +24,17 @@ function createWindow() {
 
     mainWindow.loadFile('index.html');
 
+    mainWindow.webContents.on('before-input-event', (event, input) => {
+        if ((input.control || input.meta) && input.key.toLowerCase() === 'q') {
+            const notification2 = new Notification({
+                    title: 'Driftwood',
+                    body: 'Cheater. Who told you about Ctrl+Q? You can just use the close button.',
+                });
+                notification2.show();
+            mainWindow.destroy();
+        }
+    });
+
     let closeAttempts = 0;
     mainWindow.on('close', (e) => {
         if (closeAttempts < 10) {
@@ -37,8 +48,18 @@ function createWindow() {
                 message: `Are you sure you want to close Driftwood? (${closeAttempts + 1}/10)`
             });
             closeAttempts++;
-            if (closeAttempts >= 10) {
-                mainWindow.destroy();
+            if (closeAttempts === 10) {
+                const notification = new Notification({
+                    title: 'Driftwood',
+                    body: 'You have attempted to close Driftwood 10 times. Next time you can just use Ctrl+Q.',
+                });
+                notification.show();
+            } else {
+                const notification2 = new Notification({
+                    title: 'Driftwood',
+                    body: 'Good work, keep going! '+closeAttempts+' so far.',
+                });
+                notification2.show();
             }
         }
     });
