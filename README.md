@@ -13,6 +13,13 @@ Driftwood is a deliberately useless browser built for those who love chaos, slow
 - **Lazy-Load**: but like, _really_ lazy.  
 - **Lost-In-The-Web Mode**: no back button. no history. no regrets.
 - **Tab Timers**: You can only have a tab open for 5 minutes
+- **Background Music**: Contains music in the browser to make it easier to focus (Headphones Recommended*)
+- **Modern Window Animations**: We support new modern window animations for your browser
+- **No Settings Policy**: We believe in the simplicity of the browsers so we don't include any customization
+- **No History**: Who every uses this anyways?
+- **Full Browser Tracking**: All data is fed into AI so that we can make your experience better
+- **Potato mode**: When you get bored of browsing the web normally, our revolutionary feature allows entertaining browsing
+- **P.T.S.D.**: Potentially Tramatic Surfing Discovery
 
 ---
 
