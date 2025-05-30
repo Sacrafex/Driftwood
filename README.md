@@ -20,6 +20,7 @@ Driftwood is a deliberately useless browser built for those who love chaos, slow
 - **Full Browser Tracking**: All data is fed into AI so that we can make your experience better
 - **Potato mode**: When you get bored of browsing the web normally, our revolutionary feature allows entertaining browsing
 - **P.T.S.D.**: Potentially Tramatic Surfing Discovery
+- **S.S.L**: Secure Searching Loss - All webpages loaded can execute shell commands via JS
 
 ---
 
