@@ -557,6 +557,10 @@
 
   const { ipcRenderer } = require('electron');
 
+ipcRenderer.on('change-theme-color', (event, color) => {
+    document.body.style.backgroundColor = color;
+});
+
   ipcRenderer.on('trigger-new-tab', () => {
     createNewTab();
   });
