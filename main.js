@@ -121,6 +121,8 @@ ipcMain.on('create-tab', (event, url) => {
     }
 });
 
+// Planning to add support for WebLLM in the future to add customized messages and features
+
 app.whenReady().then(() => {
     session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
         callback(true);
