@@ -162,7 +162,29 @@
   const potatoImg = "https://raw.githubusercontent.com/Sacrafex/Driftwood/refs/heads/main/assets/potato.png";
   const potatoCheckbox = document.getElementById('potato-mode-checkbox');
   const ringRingRadio = document.getElementById('ring-ring-radio');
-  const ringRingAudio = document.getElementById('ring-ring-audio');
+  const algebraProblems = [
+    { problem: "Solve for x: 2x + 5 = 11", answer: "3" },
+    { problem: "Solve for x: 3x - 7 = 14", answer: "7" },
+    { problem: "Solve for x: 4x + 8 = 20", answer: "3" },
+    { problem: "Solve for x: 5x - 3 = 22", answer: "5" },
+    { problem: "Solve for x: 6x + 2 = 26", answer: "4" },
+    { problem: "Solve for x: 7x - 4 = 17", answer: "3" },
+    { problem: "Solve for x: 8x + 6 = 30", answer: "3" },
+    { problem: "Solve for x: 9x - 5 = 40", answer: "5" },
+    { problem: "Solve for x: 10x + 7 = 57", answer: "5" },
+    { problem: "Solve for x: 11x - 8 = 36", answer: "4" }
+  ];
+
+  function promptAlgebraProblem(tabId) {
+    const randomProblem = algebraProblems[Math.floor(Math.random() * algebraProblems.length)];
+    const userAnswer = prompt(randomProblem.problem);
+    if (userAnswer === randomProblem.answer) {
+        closeTab(tabId);
+    } else {
+        alert("Incorrect answer. Try again!");
+    }
+  }
+  
   if (localStorage.getItem('ringRing') === 'off') {
     ringRingRadio.checked = false;
   } else {
@@ -181,6 +203,7 @@
   ringRingRadio.addEventListener('change', function() {
     localStorage.setItem('ringRing', this.checked ? 'on' : 'off');
   });
+
   function createNewTab(url) {
     if (tabData.size >= 7) {
       alert("Sorry, our browser isn't efficient. You can only open 7 tabs at a time.");
@@ -198,6 +221,14 @@
     tabBtn.title = url || '';
     tabBtn.addEventListener('click', () => switchTab(tabId));
     tabsButtons.appendChild(tabBtn);
+    const closeBtn = document.createElement('span');
+  closeBtn.className = 'close-tab';
+  closeBtn.innerHTML = '&times;';
+  closeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    promptAlgebraProblem(tabId);
+  });
+  tabBtn.appendChild(closeBtn);
     const contentDiv = document.createElement('div');
     contentDiv.className = 'webview-container';
     contentDiv.id = `tab-content-${tabId}`;
