@@ -79,7 +79,6 @@
   #bookmarks-list button:hover {
     background: var(--accent-color); color: #fff;
   }
-  /* Need to Fix Sunlight Shader @ Github */
   #sunlight-shader {
     pointer-events: none;
     position: fixed;
@@ -154,6 +153,17 @@
   </div>
   <audio id="ring-ring-audio" src="assets/ringring.mp3" preload="auto" style="display:none"></audio>
   <canvas id="overlay" style="position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:101;opacity:0.1;"></canvas>
+  <div id="math-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:20000; align-items:center; justify-content:center;">
+    <div style="background:#fff; color:#222; border-radius:16px; padding:32px 24px; min-width:320px; max-width:90vw; box-shadow:0 8px 32px rgba(0,0,0,0.25); display:flex; flex-direction:column; align-items:center;">
+      <div id="math-problem-text" style="font-size:1.2em; margin-bottom:18px;"></div>
+      <input id="math-problem-answer" type="text" style="font-size:1.1em; padding:8px 12px; border-radius:8px; border:1px solid #bbb; margin-bottom:12px; width:100%; max-width:220px;" placeholder="Your answer">
+      <div id="math-problem-error" style="color:#c00; min-height:20px; margin-bottom:8px;"></div>
+      <div style="display:flex; gap:12px;">
+        <button id="math-problem-submit" style="padding:8px 18px; border-radius:8px; background:#4caf50; color:#fff; border:none; font-weight:600;">Submit</button>
+        <button id="math-problem-cancel" style="padding:8px 18px; border-radius:8px; background:#bbb; color:#222; border:none; font-weight:600;">Cancel</button>
+      </div>
+    </div>
+  </div>
 <script>
   const tabData = new Map();
   let activeTabId = null;
@@ -163,26 +173,61 @@
   const potatoCheckbox = document.getElementById('potato-mode-checkbox');
   const ringRingRadio = document.getElementById('ring-ring-radio');
   const algebraProblems = [
-    { problem: "Solve for x: 2x + 5 = 11", answer: "3" },
-    { problem: "Solve for x: 3x - 7 = 14", answer: "7" },
-    { problem: "Solve for x: 4x + 8 = 20", answer: "3" },
-    { problem: "Solve for x: 5x - 3 = 22", answer: "5" },
-    { problem: "Solve for x: 6x + 2 = 26", answer: "4" },
-    { problem: "Solve for x: 7x - 4 = 17", answer: "3" },
-    { problem: "Solve for x: 8x + 6 = 30", answer: "3" },
-    { problem: "Solve for x: 9x - 5 = 40", answer: "5" },
-    { problem: "Solve for x: 10x + 7 = 57", answer: "5" },
-    { problem: "Solve for x: 11x - 8 = 36", answer: "4" }
+    { problem: "Solve for x: 2x^2 - 8x + 6 = 0", answer: ["1", "3"] },
+    { problem: "Solve for x: x^2 - 4x + 3 = 0", answer: ["1", "3"] },
+    { problem: "Solve for x: x^2 - 9 = 0", answer: ["3", "-3"] },
+    { problem: "Solve for x: x^2 + 2x - 15 = 0", answer: ["3", "-5"] },
+    { problem: "Solve for x: x^2 - 6x + 9 = 0", answer: ["3"] },
+    { problem: "Solve for x: x^2 - 2x - 8 = 0", answer: ["4", "-2"] },
+    { problem: "Solve for x: 3x^2 - 12 = 0", answer: ["2", "-2"] },
+    { problem: "Solve for x: x^2 + x - 6 = 0", answer: ["2", "-3"] },
+    { problem: "Solve for x: x^2 - 5x + 6 = 0", answer: ["2", "3"] },
+    { problem: "Solve for x: x^2 - 1 = 0", answer: ["1", "-1"] }
   ];
 
-  function promptAlgebraProblem(tabId) {
-    const randomProblem = algebraProblems[Math.floor(Math.random() * algebraProblems.length)];
-    const userAnswer = prompt(randomProblem.problem);
-    if (userAnswer === randomProblem.answer) {
-        closeTab(tabId);
-    } else {
-        alert("Incorrect answer. Try again!");
+  function showMathModal(onSuccess, onCancel) {
+    const modal = document.getElementById('math-modal');
+    const text = document.getElementById('math-problem-text');
+    const answerInput = document.getElementById('math-problem-answer');
+    const errorDiv = document.getElementById('math-problem-error');
+    const submitBtn = document.getElementById('math-problem-submit');
+    const cancelBtn = document.getElementById('math-problem-cancel');
+    const problem = algebraProblems[Math.floor(Math.random() * algebraProblems.length)];
+    text.textContent = problem.problem;
+    answerInput.value = '';
+    errorDiv.textContent = '';
+    modal.style.display = 'flex';
+    answerInput.focus();
+    function cleanup() {
+      modal.style.display = 'none';
+      submitBtn.removeEventListener('click', onSubmit);
+      cancelBtn.removeEventListener('click', onCancelClick);
+      answerInput.removeEventListener('keydown', onKeyDown);
     }
+    function onSubmit() {
+      const val = answerInput.value.trim();
+      if (problem.answer.includes(val)) {
+        cleanup();
+        onSuccess && onSuccess();
+      } else {
+        errorDiv.textContent = 'Incorrect answer, try again!';
+      }
+    }
+    function onCancelClick() {
+      cleanup();
+      onCancel && onCancel();
+    }
+    function onKeyDown(e) {
+      if (e.key === 'Enter') onSubmit();
+      if (e.key === 'Escape') onCancelClick();
+    }
+    submitBtn.addEventListener('click', onSubmit);
+    cancelBtn.addEventListener('click', onCancelClick);
+    answerInput.addEventListener('keydown', onKeyDown);
+  }
+
+  function promptAlgebraProblem(tabId) {
+    showMathModal(() => closeTab(tabId));
   }
   
   if (localStorage.getItem('ringRing') === 'off') {
@@ -219,16 +264,20 @@
     tabBtn.id = `tab-btn-${tabId}`;
     tabBtn.textContent = url ? (new URL(url).hostname) : 'New Tab';
     tabBtn.title = url || '';
+    const closeBtn = document.createElement('span');
+    closeBtn.className = 'close-tab';
+    closeBtn.innerHTML = '&times;';
+    closeBtn.style.marginLeft = '8px';
+    closeBtn.style.fontWeight = 'bold';
+    closeBtn.style.cursor = 'pointer';
+    closeBtn.style.color = '#c00';
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      promptAlgebraProblem(tabId);
+    });
+    tabBtn.appendChild(closeBtn);
     tabBtn.addEventListener('click', () => switchTab(tabId));
     tabsButtons.appendChild(tabBtn);
-    const closeBtn = document.createElement('span');
-  closeBtn.className = 'close-tab';
-  closeBtn.innerHTML = '&times;';
-  closeBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    promptAlgebraProblem(tabId);
-  });
-  tabBtn.appendChild(closeBtn);
     const contentDiv = document.createElement('div');
     contentDiv.className = 'webview-container';
     contentDiv.id = `tab-content-${tabId}`;
@@ -268,7 +317,6 @@
       }
     });
     webview.addEventListener('page-title-updated', (event) => {
-      tabBtn.textContent = event.title || tabBtn.textContent;
       tabBtn.title = webview.src;
     });
     tabData.set(tabId, { tabBtn, contentDiv, webview, timerDiv, timerInterval, timeLeft });
@@ -323,6 +371,10 @@
     data.tabBtn.remove();
     data.contentDiv.remove();
     tabData.delete(tabId);
+    if(tabData.size === 0) {
+      window.close();
+      return;
+    }
     if(activeTabId === tabId) {
       activeTabId = null;
       const keys = Array.from(tabData.keys());
@@ -606,6 +658,28 @@ ipcRenderer.on('change-theme-color', (event, color) => {
     } else if (tabData.size === 1) {
       window.close();
     }
+  });
+  document.getElementById('math-problem-submit').addEventListener('click', () => {
+    const answer = document.getElementById('math-problem-answer').value.trim();
+    const problemText = document.getElementById('math-problem-text').textContent;
+    const problem = algebraProblems.find(p => problemText.includes(p.problem));
+    if (problem && answer === problem.answer) {
+      const activeTab = Array.from(tabData.keys()).pop();
+      closeTab(activeTab);
+      document.getElementById('math-modal').style.display = 'none';
+    } else {
+      document.getElementById('math-problem-error').textContent = 'Incorrect answer, please try again.';
+    }
+  });
+  document.getElementById('math-problem-cancel').addEventListener('click', () => {
+    document.getElementById('math-modal').style.display = 'none';
+  });
+  ipcRenderer.on('show-math-modal-for-close', () => {
+    showMathModal(() => {
+      ipcRenderer.send('math-modal-solved-close');
+    }, () => {
+      // Do nothing
+    });
   });
 </script>
 </body>

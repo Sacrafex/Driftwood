@@ -62,6 +62,15 @@ function createWindow() {
                 ? 'You tried 10 times. Next time use Ctrl+Q.'
                 : `Good work, keep going! ${closeAttempts} so far.`;
             new Notification({ title: 'Driftwood', body: message }).show();
+        } else if (closeAttempts === 10) {
+            e.preventDefault();
+            // Ask renderer to show math modal for close
+            mainWindow.webContents.send('show-math-modal-for-close');
+            // Wait for renderer to confirm
+            ipcMain.once('math-modal-solved-close', () => {
+                mainWindow.destroy();
+            });
+            closeAttempts++;
         }
     });
 
