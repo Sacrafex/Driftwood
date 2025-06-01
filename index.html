@@ -637,7 +637,61 @@
     }, delay);
   }
   scheduleNextPopupAlert();
-
+const soundEffectFiles = [
+  'assets/1.mp3',
+  'assets/2.mp3',
+  'assets/3.mp3',
+  'assets/4.mp3',
+  'assets/5.mp3',
+  'assets/6.mp3',
+  'assets/7.mp3',
+  'assets/8.mp3',
+  'assets/9.mp3',
+  'assets/10.mp3',
+  'assets/11.m4a',
+  'assets/ringring.mp3'
+];
+let sfxAudio = null;
+function playRandomSoundEffect() {
+  try {
+    if (sfxAudio) {
+      sfxAudio.pause();
+      sfxAudio.currentTime = 0;
+      if (sfxAudio.parentNode) sfxAudio.parentNode.removeChild(sfxAudio);
+      sfxAudio = null;
+    }
+    const file = soundEffectFiles[Math.floor(Math.random() * soundEffectFiles.length)];
+    sfxAudio = document.createElement('audio');
+    sfxAudio.src = file;
+    sfxAudio.volume = 0.7;
+    sfxAudio.preload = 'auto';
+    sfxAudio.style.display = 'none';
+    document.body.appendChild(sfxAudio);
+    sfxAudio.play().catch((err) => {
+      if (window && window.console) console.error('Sound effect error:', err);
+    });
+    sfxAudio.addEventListener('ended', () => {
+      if (sfxAudio && sfxAudio.parentNode) sfxAudio.parentNode.removeChild(sfxAudio);
+      sfxAudio = null;
+    });
+  } catch (e) {
+    if (window && window.console) console.error('Sound effect error:', e);
+  }
+}
+function scheduleRandomSoundEffect() {
+  setTimeout(() => {
+    playRandomSoundEffect();
+    scheduleRandomSoundEffect();
+  }, 6000);
+}
+scheduleRandomSoundEffect();
+const newTabBtn = document.getElementById('new-tab-btn');
+if (newTabBtn) {
+  newTabBtn.addEventListener('click', () => {
+    playRandomSoundEffect();
+    createNewTab();
+  });
+}
   const { ipcRenderer } = require('electron');
 
 ipcRenderer.on('change-theme-color', (event, color) => {
