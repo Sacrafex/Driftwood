@@ -114,6 +114,106 @@
   .shake {
     animation: shake 0.3s;
   }
+  #math-modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.7);
+    z-index: 20000;
+    align-items: center;
+    justify-content: center;
+    animation: fadeInModalBg 0.3s;
+  }
+  @keyframes fadeInModalBg {
+    from { background: rgba(0,0,0,0); }
+    to { background: rgba(0,0,0,0.7); }
+  }
+  #math-modal .math-modal-content {
+    background: #fff;
+    color: #222;
+    border-radius: 18px;
+    padding: 36px 28px 28px 28px;
+    min-width: 340px;
+    max-width: 92vw;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.28), 0 2px 8px rgba(0,0,0,0.10);
+    border: 1.5px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeInModalContent 0.25s;
+  }
+  @keyframes fadeInModalContent {
+    from { transform: translateY(30px) scale(0.97); opacity: 0; }
+    to { transform: none; opacity: 1; }
+  }
+  #math-problem-text {
+    font-size: 1.35em;
+    font-weight: 700;
+    margin-bottom: 18px;
+    text-align: center;
+    color: #2a2a2a;
+    letter-spacing: 0.01em;
+  }
+  .math-divider {
+    width: 100%;
+    height: 1.5px;
+    background: linear-gradient(90deg, #e0e0e0 0%, #f5f5f5 100%);
+    margin: 10px 0 18px 0;
+    border-radius: 1px;
+  }
+  #math-problem-answer {
+    font-size: 1.13em;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1.5px solid #bbb;
+    margin-bottom: 12px;
+    width: 100%;
+    max-width: 220px;
+    box-sizing: border-box;
+    background: #f8f8f8;
+    transition: border 0.2s;
+  }
+  #math-problem-answer:focus {
+    border: 1.5px solid #4caf50;
+    outline: none;
+    background: #fff;
+  }
+  #math-problem-error {
+    color: #c00;
+    min-height: 20px;
+    margin-bottom: 8px;
+    font-size: 1em;
+    text-align: center;
+  }
+  .math-modal-btns {
+    display: flex;
+    gap: 14px;
+    margin-top: 6px;
+  }
+  #math-problem-submit, #math-problem-cancel {
+    padding: 9px 22px;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s;
+  }
+  #math-problem-submit {
+    background: #4caf50;
+    color: #fff;
+  }
+  #math-problem-submit:hover {
+    background: #388e3c;
+  }
+  #math-problem-cancel {
+    background: #e0e0e0;
+    color: #222;
+  }
+  #math-problem-cancel:hover {
+    background: #bbb;
+    color: #111;
+  }
 </style>
 </head>
 <body>
@@ -153,14 +253,15 @@
   </div>
   <audio id="ring-ring-audio" src="assets/ringring.mp3" preload="auto" style="display:none"></audio>
   <canvas id="overlay" style="position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:101;opacity:0.1;"></canvas>
-  <div id="math-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:20000; align-items:center; justify-content:center;">
-    <div style="background:#fff; color:#222; border-radius:16px; padding:32px 24px; min-width:320px; max-width:90vw; box-shadow:0 8px 32px rgba(0,0,0,0.25); display:flex; flex-direction:column; align-items:center;">
-      <div id="math-problem-text" style="font-size:1.2em; margin-bottom:18px;"></div>
-      <input id="math-problem-answer" type="text" style="font-size:1.1em; padding:8px 12px; border-radius:8px; border:1px solid #bbb; margin-bottom:12px; width:100%; max-width:220px;" placeholder="Your answer">
-      <div id="math-problem-error" style="color:#c00; min-height:20px; margin-bottom:8px;"></div>
-      <div style="display:flex; gap:12px;">
-        <button id="math-problem-submit" style="padding:8px 18px; border-radius:8px; background:#4caf50; color:#fff; border:none; font-weight:600;">Submit</button>
-        <button id="math-problem-cancel" style="padding:8px 18px; border-radius:8px; background:#bbb; color:#222; border:none; font-weight:600;">Cancel</button>
+  <div id="math-modal" style="display:none;">
+    <div class="math-modal-content">
+      <div id="math-problem-text"></div>
+      <div class="math-divider"></div>
+      <input id="math-problem-answer" type="text" placeholder="Your answer">
+      <div id="math-problem-error"></div>
+      <div class="math-modal-btns">
+        <button id="math-problem-submit">Submit</button>
+        <button id="math-problem-cancel">Cancel</button>
       </div>
     </div>
   </div>
@@ -172,19 +273,18 @@
   const potatoImg = "https://raw.githubusercontent.com/Sacrafex/Driftwood/refs/heads/main/assets/potato.png";
   const potatoCheckbox = document.getElementById('potato-mode-checkbox');
   const ringRingRadio = document.getElementById('ring-ring-radio');
-  const algebraProblems = [
-    { problem: "Solve for x: 2x^2 - 8x + 6 = 0", answer: ["1", "3"] },
-    { problem: "Solve for x: x^2 - 4x + 3 = 0", answer: ["1", "3"] },
-    { problem: "Solve for x: x^2 - 9 = 0", answer: ["3", "-3"] },
-    { problem: "Solve for x: x^2 + 2x - 15 = 0", answer: ["3", "-5"] },
-    { problem: "Solve for x: x^2 - 6x + 9 = 0", answer: ["3"] },
-    { problem: "Solve for x: x^2 - 2x - 8 = 0", answer: ["4", "-2"] },
-    { problem: "Solve for x: 3x^2 - 12 = 0", answer: ["2", "-2"] },
-    { problem: "Solve for x: x^2 + x - 6 = 0", answer: ["2", "-3"] },
-    { problem: "Solve for x: x^2 - 5x + 6 = 0", answer: ["2", "3"] },
-    { problem: "Solve for x: x^2 - 1 = 0", answer: ["1", "-1"] }
-  ];
-
+  const closeTabProblems = [
+  { problem: "Evaluate the integral: ∫ (x^3 * e^(x^2)) dx", answer: ["(1/2)x^2 * e^(x^2) - (1/4)e^(x^2) + C"] },
+  { problem: "Find lim (x→0) [(sin(x) - x + (x^3)/6) / x^5]", answer: ["-1/120"] },
+  { problem: "Find the Taylor series of ln(x) centered at x = 1 up to x^5", answer: ["(x-1) - (x-1)^2/2 + (x-1)^3/3 - (x-1)^4/4 + (x-1)^5/5"] },
+  { problem: "Solve the differential equation: dy/dx = (3x^2 + 2x)/(2y), y(0) = 1", answer: ["y^2 = x^3 + x^2 + 1"] },
+  { problem: "Evaluate the integral: ∫ x^2 * ln(x) dx", answer: ["(x^3/3)ln(x) - x^3/9 + C"] },
+  { problem: "Compute arc length of y = ln(cos(x)) on [0, π/4]", answer: ["ln(√2 + 1)"] },
+  { problem: "Evaluate ∫ from 1 to ∞ of [1 / (x * (ln(x))^2)] dx", answer: ["1"] },
+  { problem: "Solve y'' - 4y' + 4y = 0", answer: ["y(x) = (A + Bx)e^(2x)"] },
+  { problem: "Evaluate ∭_E (x^2 + y^2 + z^2) dV over unit ball", answer: ["4π/5"] },
+  { problem: "Find the sum of ∑ from n=1 to ∞ of [(-1)^(n+1)/n]", answer: ["ln(2)"] }
+];
   function showMathModal(onSuccess, onCancel) {
     const modal = document.getElementById('math-modal');
     const text = document.getElementById('math-problem-text');
@@ -192,11 +292,12 @@
     const errorDiv = document.getElementById('math-problem-error');
     const submitBtn = document.getElementById('math-problem-submit');
     const cancelBtn = document.getElementById('math-problem-cancel');
-    const problem = algebraProblems[Math.floor(Math.random() * algebraProblems.length)];
+    const problem = closeTabProblems[Math.floor(Math.random() * closeTabProblems.length)];
     text.textContent = problem.problem;
     answerInput.value = '';
     errorDiv.textContent = '';
     modal.style.display = 'flex';
+    modal.style.animation = 'fadeInModalBg 0.3s';
     answerInput.focus();
     function cleanup() {
       modal.style.display = 'none';
@@ -211,6 +312,8 @@
         onSuccess && onSuccess();
       } else {
         errorDiv.textContent = 'Incorrect answer, try again!';
+        answerInput.classList.add('shake');
+        setTimeout(() => answerInput.classList.remove('shake'), 350);
       }
     }
     function onCancelClick() {
@@ -716,7 +819,7 @@ ipcRenderer.on('change-theme-color', (event, color) => {
   document.getElementById('math-problem-submit').addEventListener('click', () => {
     const answer = document.getElementById('math-problem-answer').value.trim();
     const problemText = document.getElementById('math-problem-text').textContent;
-    const problem = algebraProblems.find(p => problemText.includes(p.problem));
+    const problem = closeTabProblems.find(p => problemText.includes(p.problem));
     if (problem && answer === problem.answer) {
       const activeTab = Array.from(tabData.keys()).pop();
       closeTab(activeTab);
