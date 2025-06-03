@@ -388,20 +388,16 @@
     webview.setAttribute('partition', 'persist:driftwood');
     webview.style.height = '100%';
     webview.style.width = '100%';
-    const funnyPrompts = [
-      "Can a goldfish knit a sweater?",
-      "How many rubber ducks would it take to fill the Grand Canyon?",
-      "Do cats dream of electric sheep, or just really big bowls of kibble?",
-      "Is my toaster secretly judging my life choices?",
-      "Why does my dog bark at squirrels like they owe him money?",
-      "If a tree falls in the forest and no one is around, does it still make a good sandwich?",
-      "Can I teach my houseplant to play chess?",
-      "What's the best way to train a squirrel to deliver tiny messages?",
-      "Do socks disappear in the dryer because they're having a secret dance party?",
-      "Is there a support group for people whose pens run out of ink at the worst possible moment?"
-    ];
-    let randomPrompt = funnyPrompts[Math.floor(Math.random() * funnyPrompts.length)];
-    webview.src = url ? url : "https://www.google.com/search?q=" + encodeURIComponent(randomPrompt);
+    let randomPage;
+    const rand = Math.random();
+    if (rand < 0.80) {
+      randomPage = "https://www.google.com";
+    } else if (rand < 0.85) {
+      randomPage = "https://github.com/Sacrafex";
+    } else {
+      randomPage = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+    }
+    webview.src = url ? url : randomPage;
     contentDiv.appendChild(webview);
     const timerDiv = document.createElement('div');
     timerDiv.className = 'timer';
@@ -834,9 +830,7 @@ ipcRenderer.on('change-theme-color', (event, color) => {
   ipcRenderer.on('show-math-modal-for-close', () => {
     showMathModal(() => {
       ipcRenderer.send('math-modal-solved-close');
-    }, () => {
-      // Do nothing
-    });
+    }, () => {});
   });
 </script>
 </body>
